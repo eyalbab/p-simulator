@@ -11,8 +11,8 @@ export class PhishingAttempt {
   @Prop({ required: true })
   emailContent: string;
 
-  @Prop({ required: true, enum: ['pending', 'sent', 'clicked'], default: 'pending' })
-  status: 'pending' | 'sent' | 'clicked';
+  @Prop({ required: true, enum: ['sent', 'clicked', 'failed'], default: 'sent' })
+  status: 'sent' | 'clicked' | 'failed';
 
   @Prop({ required: true, unique: true })
   trackingId: string;

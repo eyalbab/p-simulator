@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { AlertCircle, CheckCircle2, Clock3, RefreshCw, ShieldAlert } from 'lucide-react'
+import { AlertCircle, CheckCircle2, RefreshCw, ShieldAlert, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { apiClient } from '@/api/client'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/context/AuthContext'
 import { getApiErrorMessage } from '@/lib/get-api-error-message'
 
-type PhishingStatus = 'pending' | 'sent' | 'clicked'
+type PhishingStatus = 'sent' | 'clicked' | 'failed'
 
 type PhishingAttempt = {
   _id: string
@@ -71,7 +71,7 @@ function getStatusClassName(status: PhishingStatus): string {
     return 'border-emerald-300 bg-emerald-100 text-emerald-800'
   }
 
-  return 'border-amber-300 bg-amber-100 text-amber-800'
+  return 'border-red-300 bg-red-100 text-red-800'
 }
 
 export function DashboardPage() {
@@ -125,9 +125,9 @@ export function DashboardPage() {
     }
   }
 
-  const pendingCount = attempts.filter((attempt) => attempt.status === 'pending').length
   const sentCount = attempts.filter((attempt) => attempt.status === 'sent').length
   const clickedCount = attempts.filter((attempt) => attempt.status === 'clicked').length
+  const failedCount = attempts.filter((attempt) => attempt.status === 'failed').length
 
   return (
     <main className="min-h-screen bg-linear-to-b from-muted/50 via-background to-background">
@@ -153,17 +153,6 @@ export function DashboardPage() {
             <CardContent className="flex items-center justify-between px-5 py-4">
               <div>
                 <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Pending
-                </p>
-                <p className="mt-1 text-2xl font-semibold">{pendingCount}</p>
-              </div>
-              <Clock3 className="size-5 text-amber-600" aria-hidden="true" />
-            </CardContent>
-          </Card>
-          <Card className="border-border/80">
-            <CardContent className="flex items-center justify-between px-5 py-4">
-              <div>
-                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   Sent
                 </p>
                 <p className="mt-1 text-2xl font-semibold">{sentCount}</p>
@@ -180,6 +169,17 @@ export function DashboardPage() {
                 <p className="mt-1 text-2xl font-semibold">{clickedCount}</p>
               </div>
               <ShieldAlert className="size-5 text-destructive" aria-hidden="true" />
+            </CardContent>
+          </Card>
+          <Card className="border-border/80">
+            <CardContent className="flex items-center justify-between px-5 py-4">
+              <div>
+                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Failed
+                </p>
+                <p className="mt-1 text-2xl font-semibold">{failedCount}</p>
+              </div>
+              <XCircle className="size-5 text-red-600" aria-hidden="true" />
             </CardContent>
           </Card>
         </div>

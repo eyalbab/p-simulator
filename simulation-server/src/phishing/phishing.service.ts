@@ -31,29 +31,35 @@ export class PhishingService {
     const trackingId = uuidv4();
     const trackingBaseUrl = this.configService.get<string>('TRACKING_BASE_URL', 'http://localhost:3001');
     const trackingUrl = `${trackingBaseUrl}/phishing/track/${trackingId}`;
+    const emailHtml = this.buildEmailHtml(dto.emailContent, trackingUrl);
 
-    const attempt = await this.phishingAttemptModel.create({
+    try {
+      await this.transporter.sendMail({
+        from: this.configService.get<string>('SMTP_USER'),
+        to: dto.recipientEmail,
+        subject: 'Important: Action Required',
+        html: emailHtml,
+      });
+    } catch (error) {
+      await this.phishingAttemptModel.create({
+        recipientEmail: dto.recipientEmail,
+        emailContent: dto.emailContent,
+        status: 'failed',
+        trackingId,
+        sentBy: new Types.ObjectId(dto.sentBy),
+      });
+
+      throw error;
+    }
+
+    return this.phishingAttemptModel.create({
       recipientEmail: dto.recipientEmail,
       emailContent: dto.emailContent,
-      status: 'pending',
+      status: 'sent',
+      sentAt: new Date(),
       trackingId,
       sentBy: new Types.ObjectId(dto.sentBy),
     });
-
-    const emailHtml = this.buildEmailHtml(dto.emailContent, trackingUrl);
-
-    await this.transporter.sendMail({
-      from: this.configService.get<string>('SMTP_USER'),
-      to: dto.recipientEmail,
-      subject: 'Important: Action Required',
-      html: emailHtml,
-    });
-
-    attempt.status = 'sent';
-    attempt.sentAt = new Date();
-    await attempt.save();
-
-    return attempt;
   }
 
   async trackClick(trackingId: string): Promise<PhishingAttemptDocument> {
