@@ -18,6 +18,9 @@ import { PhishingService } from './phishing.service';
           'SIMULATION_SERVER_URL',
           'http://localhost:3001',
         ),
+        headers: {
+          'x-api-key': config.get<string>('SERVICE_API_KEY', ''),
+        },
       }),
     }),
   ],

@@ -21,8 +21,11 @@ cp .env.example .env
 
 Update secrets before running:
 
-- `management-server/.env`: `JWT_SECRET`
-- `simulation-server/.env`: `SMTP_USER`, `SMTP_PASS`
+- `management-server/.env`: `JWT_SECRET`, `SERVICE_API_KEY`
+- `simulation-server/.env`: `SMTP_USER`, `SMTP_PASS`, `SERVICE_API_KEY`
+- `.env` (root): `SERVICE_API_KEY` (used by Docker Compose for both servers)
+
+> `SERVICE_API_KEY` must be identical in both servers — it authenticates management-to-simulation service calls.
 
 ### 2) Build and start all services
 

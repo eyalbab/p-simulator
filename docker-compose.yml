@@ -23,6 +23,7 @@ services:
     environment:
       MONGODB_URI: mongodb://mongodb:27017/phishing-simulator
       TRACKING_BASE_URL: ${TRACKING_BASE_URL:-http://localhost:3001}
+      SERVICE_API_KEY: ${SERVICE_API_KEY}
       PORT: 3001
     ports:
       - "3001:3001"
@@ -40,6 +41,7 @@ services:
     environment:
       MONGODB_URI: mongodb://mongodb:27017/phishing-simulator
       SIMULATION_SERVER_URL: http://simulation-server:3001
+      SERVICE_API_KEY: ${SERVICE_API_KEY}
       PORT: 3000
     ports:
       - "3000:3000"

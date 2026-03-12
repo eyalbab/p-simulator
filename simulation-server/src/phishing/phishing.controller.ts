@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
+import { ApiKeyGuard } from './guards/api-key.guard';
 import { PhishingService } from './phishing.service';
 import { SendPhishingDto } from './send-phishing.dto';
 
@@ -9,6 +10,7 @@ export class PhishingController {
 
   @Post('send')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ApiKeyGuard)
   async sendPhishingEmail(@Body() dto: SendPhishingDto) {
     const attempt = await this.phishingService.sendPhishingEmail(dto);
     return {
