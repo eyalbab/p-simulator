@@ -1,0 +1,66 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  simulation-server:
+    build:
+      context: ./simulation-server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./simulation-server/.env
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/phishing-simulator
+      TRACKING_BASE_URL: ${TRACKING_BASE_URL:-http://localhost:3001}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  management-server:
+    build:
+      context: ./management-server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./management-server/.env
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/phishing-simulator
+      SIMULATION_SERVER_URL: http://simulation-server:3001
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      simulation-server:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_MANAGEMENT_SERVER_URL: ${VITE_MANAGEMENT_SERVER_URL:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      management-server:
+        condition: service_started
+
+volumes:
+  mongo-data:
